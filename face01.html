@@ -1,0 +1,83 @@
+<!DOCTYPE html>  
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>CCV.js臉部偵測範例</title>
+    <script type="text/javascript" src="ccv.js"></script>
+    <script type="text/javascript" src="face.js"></script>
+    <script type="text/javascript" src="jquery_1.5.2.min.js"></script>
+  </head>
+
+  <body>
+    <input type="button" id="btn1" value="圖片一（單人）"></input>
+	<input type="button" id="btn2" value="圖片二（多人）"></input>
+	<input type="button" id="btn3" value="開始偵測"></input>
+	<br />	<br />
+    <canvas id="canvas"  width="800px" height="550px"/>
+  </body>
+  
+</html>
+
+<script>
+
+  var image = new Image();
+  var canvas01 = $('#canvas').get(0);
+  //設定canvas為2d模式
+  var ctx = canvas01.getContext("2d");
+  
+
+  $("#btn1").click(function() {
+	image.src = "001.jpg";
+	//當圖片尚未載入完成前，如果drawImage已經先執行了，則不會有任何繪製的動作出現
+	//所以必需用load事件來避免這樣的問題。
+	//如果沒有使用load事件的話，則按鈕需按兩次才會把圖片繪製進來
+	image.addEventListener("load", function() {
+	        //清除指定區域內的圖形
+	        ctx.clearRect(0,0,800,550);
+            ctx.drawImage(image,0,0);
+        }, false);
+  });
+  
+  $("#btn2").click(function() {
+	image.src = "002.jpg";
+	//當圖片尚未載入完成前，如果drawImage已經先執行了，則不會有任何繪製的動作出現
+	//所以必需用load事件來避免這樣的問題。
+	//如果沒有使用load事件的話，則按鈕需按兩次才會把圖片繪製進來
+	image.addEventListener("load", function() {
+	        //清除指定區域內的圖形
+	        ctx.clearRect(0,0,800,550);
+            ctx.drawImage(image,0,0);
+        }, false);
+  });
+  
+  $("#btn3").click(function() {
+     fun_start();
+  });
+  
+  function fun_start(){
+      //ccv偵測人臉函數，可以識別多個臉孔，傳回物件陣列
+      var face1 = ccv.detect_objects({ 
+	        "canvas" : ccv.grayscale(ccv.pre(image)),
+            "cascade" : cascade,
+            "interval" : 5,
+            "min_neighbors" : 1 });
+	 //繪製圖片
+     ctx.drawImage(image, 0, 0);
+	 //設定線條寬度
+     ctx.lineWidth = 2;
+	 //設定線條顏色
+     ctx.strokeStyle = "rgb(0,125,255)";
+	 var i ;
+     //將識別出來的人臉加上處理，face1是一個物件的陣列
+     for (i = 0; i < face1.length; i++){
+	   //把人臉加上外框，以canvas來繪製
+       ctx.strokeRect(face1[i].x, face1[i].y, (face1[i].width+10)  , (face1[i].height+10) );
+	   //加上文字
+	   ctx.fillStyle = "rgb(255,0,0)";
+	   ctx.font = (face1[i].width/5) +  "pt Calibri";
+       ctx.fillText("無名氏",face1[i].x  , (face1[i].y-5) );
+     }
+  } 
+</script>
+
